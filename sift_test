@@ -1,0 +1,42 @@
+import glob
+import numpy as np
+import cv2
+
+def sift_list(path):
+
+    im = []
+    for i in path:
+        z = cv2.imread(i)
+        im_gray = cv2.cvtColor(z, cv2.COLOR_BGR2GRAY)
+
+        sift1 = cv2.SIFT_create()
+        keypoints, descriptors = sift1.detectAndCompute(im_gray, None)
+
+        #z = cv2.drawKeypoints(z, keypoints, z, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        im.append(descriptors)
+
+    return im
+
+def match_list(desc1,desc2):
+    in_DDBB = []
+    for i in desc1:
+        for j in desc2:
+            bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck= False)
+            matches = bf.match(i, j)
+            good = []
+            for m,n in matches:
+                if m.distance < 0.33*n.distance:
+                    good.append([m])
+            if len(good) > 99:
+                in_DDBB.append(1)
+            else:
+                in_DDBB.append(-1)
+    return in_DDBB
+
+if __name__ == '__main__':
+    path = glob.glob('C:\\Users\sergi\Desktop\MCV\M1\Fotos\W1\BBDD\*.jpg')
+    path2 = glob.glob('C:\\Users\sergi\Desktop\MCV\M1\Fotos\W1\qsd1_w1\*.jpg')
+    a = sift_list(path)
+    b = sift_list(path2)
+    c = match_list(a, b)
+    print(c)
